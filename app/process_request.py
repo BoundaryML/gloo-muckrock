@@ -56,6 +56,8 @@ def map_status(data: FOIARequestData) -> MRStatus:
         return MRStatus.NO_DOCS
     elif both == (RequestStatus.REQUEST_COMPLETED, RecordsStatus.RECORDS_FOUND):
         return MRStatus.DONE
+    elif both == (RequestStatus.REQUEST_COMPLETED, RecordsStatus.NOT_APPLICABLE):
+        return MRStatus.DONE
     elif both == (RequestStatus.IN_PROGRESS, RecordsStatus.MORE_RECORDS_PENDING):
         return MRStatus.PARTIAL
     elif both == (RequestStatus.IN_PROGRESS, RecordsStatus.RECORDS_FOUND):
