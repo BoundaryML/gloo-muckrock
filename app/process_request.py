@@ -9,15 +9,11 @@ from typing import Any, Awaitable, Callable, Dict, List, Tuple
 # Third Party
 import pandas as pd
 import tiktoken
-from baml_client.tracing import trace, set_tags
 from pydantic import BaseModel
 
-from baml_client.baml_types import (
-    FOIARequestData,
-    RecordsStatus,
-    RequestStatus,
-)
-from baml_client import baml as b
+from ..baml_client import baml as b
+from ..baml_client.baml_types import FOIARequestData, RecordsStatus, RequestStatus
+from ..baml_client.tracing import set_tags, trace
 
 
 class MRStatus(Enum):
