@@ -8,8 +8,9 @@ packages = [{include = "app"}]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-gloo-lib = "^1.1.21"
 tiktoken = "^0.5.1"
+baml = "^0.10.0"
+
 
 [tool.poetry.group.analytics.dependencies]
 ipykernel = "^6.25.1"

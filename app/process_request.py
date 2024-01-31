@@ -4,21 +4,16 @@ import logging
 import os
 from collections import defaultdict
 from enum import Enum
-from typing import Any, Awaitable, Callable, Dict, List
+from typing import Any, Awaitable, Callable, Dict, List, Tuple
 
 # Third Party
 import pandas as pd
 import tiktoken
-from gloo_py import trace, update_trace_tags
 from pydantic import BaseModel
 
-from ..generated.custom_types import (
-    FOIARequestData,
-    FoiaTestCasePayload,
-    RecordsStatus,
-    RequestStatus,
-)
-from ..generated.functions import ExtractRequestData, Summarize
+from ..baml_client import baml as b
+from ..baml_client.baml_types import FOIARequestData, RecordsStatus, RequestStatus
+from ..baml_client.tracing import set_tags, trace
 
 
 class MRStatus(Enum):
@@ -50,13 +45,14 @@ def map_status_(status: RequestStatus, recordsStatus: RecordsStatus):
 
 
 def map_status(data: FOIARequestData) -> MRStatus:
-
     both = (data.requestStatus, data.recordsStatus)
     req = data.requestStatus
 
     if both == (RequestStatus.REQUEST_COMPLETED, RecordsStatus.NO_RECORDS_FOUND):
         return MRStatus.NO_DOCS
     elif both == (RequestStatus.REQUEST_COMPLETED, RecordsStatus.RECORDS_FOUND):
+        return MRStatus.DONE
+    elif both == (RequestStatus.REQUEST_COMPLETED, RecordsStatus.NOT_APPLICABLE):
         return MRStatus.DONE
     elif both == (RequestStatus.IN_PROGRESS, RecordsStatus.MORE_RECORDS_PENDING):
         return MRStatus.PARTIAL
@@ -124,11 +120,12 @@ def expected_gloo_statuses(mrStatus: MRStatus) -> ExpectedOutput:
 enc = tiktoken.encoding_for_model("gpt-4")
 
 
-@trace()
-async def process_request(request_text: str, file_text: str, **tags) -> (FOIARequestData, str):
-
+@trace
+async def process_request(
+    request_text: str, file_text: str, **tags
+) -> (Tuple[FOIARequestData, str]):
     if tags:
-        update_trace_tags(**tags)
+        set_tags(**tags)
 
     if file_text:
         file_text = f"Attached Correspondence:\n{file_text}"
@@ -141,49 +138,14 @@ async def process_request(request_text: str, file_text: str, **tags) -> (FOIAReq
         tokens = tokens[: max_tokens - len(ellipsis_tokens)] + ellipsis_tokens
     request_text = enc.decode(tokens)
 
-    extractedData = await ExtractRequestData(
-        "v1",
+    extractedData = await b.ExtractRequestData(
         request_text,
     )
     status = map_status(extractedData)
-    update_trace_tags(
+    set_tags(
         status=status.value,
         has_tracking=str(extractedData.trackingNumber is not None),
         has_date=str(extractedData.dateEstimate is not None),
     )
 
     return (extractedData, status.value)
-
-
-# This function is called by the Gloo ProcessRequestTestWrapper function in process-request-test-fn.gloo
-# This function just takes more test metadata as its input, and then calls the "real" production function
-# "process_request" above.
-# We do this right now so Gloo publishes all of the FoiaTestCasePayload to the dashboard when this
-# function is called, to be able to view associated metadata with each test case.
-# The need to declare the .gloo function may be removed in favor of a simpler
-# @gloo_test annotation.
-async def process_request_test(test_case: FoiaTestCasePayload) -> (FOIARequestData, str):
-
-    extracted_data, status = await process_request(test_case.communication, test_case.file_text)
-
-    assert status == test_case.status
-
-    if test_case.price:
-        assert extracted_data.price == test_case.price
-
-    return extracted_data, status
-
-
-async def process_request_metadata_test(
-    test_case: FoiaTestCasePayload,
-) -> FOIARequestData:
-
-    extracted_data, _status = await process_request(test_case.communication, test_case.file_text)
-
-    if test_case.tracking_number:
-        assert extracted_data.trackingNumber == test_case.tracking_number
-
-    if test_case.date_estimate:
-        assert extracted_data.dateEstimate == test_case.date_estimate
-
-    return extracted_data
