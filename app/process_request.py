@@ -7,7 +7,6 @@ from enum import Enum
 from typing import Any, Awaitable, Callable, Dict, List, Tuple
 
 # Third Party
-import pandas as pd
 import tiktoken
 from pydantic import BaseModel
 
