@@ -10,17 +10,18 @@
 from .clients.client_gpt35client import GPT35Client
 from .clients.client_gpt4client import GPT4Client
 from .functions.fx_extractrequestdata import BAMLExtractRequestData
+from .functions.fx_paymentvalidation import BAMLPaymentValidation
 from .functions.fx_summarize import BAMLSummarize
 from baml_core.otel import add_message_transformer_hook, flush_trace_logs
 from baml_core.provider_manager import LLMManager
 from baml_core.services import LogSchema
-from baml_core.services.api_types import LogSchema
 from baml_lib import DeserializerException, baml_init
 from typing import Callable, List, Optional
 
 
 class BAMLClient:
     ExtractRequestData = BAMLExtractRequestData
+    PaymentValidation = BAMLPaymentValidation
     Summarize = BAMLSummarize
     GPT35Client = GPT35Client
     GPT4Client = GPT4Client

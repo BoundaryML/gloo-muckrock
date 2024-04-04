@@ -11,7 +11,7 @@ import tiktoken
 from pydantic import BaseModel
 
 from ..baml_client import baml as b
-from ..baml_client.baml_types import FOIARequestData, RecordsStatus, RequestStatus
+from ..baml_client.baml_types import FOIARequestData, RecordsStatus, RequestStatus, PaymentValidationData
 from ..baml_client.tracing import set_tags, trace
 
 
@@ -141,6 +141,17 @@ async def process_request(
         request_text,
     )
     status = map_status(extractedData)
+
+    # if the first prompt marks it as payment, use the followup
+    # payment validation prompt
+    if status == MRStatus.PAYMENT:
+        paymentData = await b.PaymentValidation(
+            request_text,
+        )
+        # we mark as fix required if there is not presentPayment or if notReceived is True
+        if paymentData.presentPayment is None or paymentData.notReceived:
+            status = MRStatus.FIX
+
     set_tags(
         status=status.value,
         has_tracking=str(extractedData.trackingNumber is not None),

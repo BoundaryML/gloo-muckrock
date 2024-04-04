@@ -7,12 +7,12 @@
 # pylint: disable=unused-import,line-too-long
 # fmt: off
 
-from baml_core.otel import set_tags, trace
+from baml_lib._impl.deserializer import register_deserializer
+from pydantic import BaseModel
+from typing import Optional
 
 
-
-
-__all__ = [
-    'set_tags',
-    'trace'
-]
+@register_deserializer({  })
+class ExactPaymentData(BaseModel):
+    exactAmount: float
+    quote: str

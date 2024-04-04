@@ -11,7 +11,9 @@ from baml_lib._impl.deserializer import register_deserializer
 from enum import Enum
 
 
-@register_deserializer({  })
+@register_deserializer({
+
+})
 class RequestStatus(str, Enum):
     IN_PROGRESS = "IN_PROGRESS"
     FIX_REQUIRED = "FIX_REQUIRED"

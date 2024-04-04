@@ -10,4 +10,5 @@
 
 
 from .fx_extractrequestdata_impl_v1 import v1 as unused_fx_extractrequestdata_impl_v1
+from .fx_paymentvalidation_impl_v1 import v1 as unused_fx_paymentvalidation_impl_v1
 from .fx_summarize_impl_v1 import v1 as unused_fx_summarize_impl_v1

@@ -12,13 +12,16 @@ from ..functions.fx_extractrequestdata import BAMLExtractRequestData
 from ..types.classes.cls_foiarequestdata import FOIARequestData
 from ..types.enums.enm_recordsstatus import RecordsStatus
 from ..types.enums.enm_requeststatus import RequestStatus
+from ..types.partial.classes.cls_foiarequestdata import PartialFOIARequestData
+from baml_core.provider_manager.llm_response import LLMResponse
+from baml_core.stream import AsyncStream
 from baml_lib._impl.deserializer import Deserializer
 
 
+import typing
 # Impl: v1
 # Client: GPT4Client
-# An implementation of .
-
+# An implementation of ExtractRequestData.
 
 __prompt_template = """\
 You are analyzing public records correspondence to figure out what the status of the request for public records is. Your job is to extract the information from the government's response and classify the status of the request.
@@ -72,13 +75,26 @@ __input_replacers = {
 # for inline SpecialForms like Optional, Union, List.
 __deserializer = Deserializer[FOIARequestData](FOIARequestData)  # type: ignore
 
+# Add a deserializer that handles stream responses, which are all Partial types
+__partial_deserializer = Deserializer[PartialFOIARequestData](PartialFOIARequestData)  # type: ignore
 
 
 
 
 
-@BAMLExtractRequestData.register_impl("v1")
+
+
 async def v1(arg: str, /) -> FOIARequestData:
     response = await GPT4Client.run_prompt_template(template=__prompt_template, replacers=__input_replacers, params=dict(arg=arg))
     deserialized = __deserializer.from_string(response.generated)
     return deserialized
+
+
+def v1_stream(arg: str, /) -> AsyncStream[FOIARequestData, PartialFOIARequestData]:
+    def run_prompt() -> typing.AsyncIterator[LLMResponse]:
+        raw_stream = GPT4Client.run_prompt_template_stream(template=__prompt_template, replacers=__input_replacers, params=dict(arg=arg))
+        return raw_stream
+    stream = AsyncStream(stream_cb=run_prompt, partial_deserializer=__partial_deserializer, final_deserializer=__deserializer)
+    return stream
+
+BAMLExtractRequestData.register_impl("v1")(v1, v1_stream)

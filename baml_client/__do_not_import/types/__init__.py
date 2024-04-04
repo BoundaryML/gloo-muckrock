@@ -7,7 +7,12 @@
 # pylint: disable=unused-import,line-too-long
 # fmt: off
 
+from .classes.cls_estimatepaymentdata import EstimatePaymentData
+from .classes.cls_exactpaymentdata import ExactPaymentData
 from .classes.cls_foiarequestdata import FOIARequestData
+from .classes.cls_paymentvalidationdata import PaymentValidationData
+from .classes.cls_paymentvalidationdata2 import PaymentValidationData2
+from .classes.cls_receivedpaymentdata import ReceivedPaymentData
 from .enums.enm_recordsstatus import RecordsStatus
 from .enums.enm_requeststatus import RequestStatus
 
@@ -15,7 +20,12 @@ from .enums.enm_requeststatus import RequestStatus
 
 
 __all__ = [
+    'EstimatePaymentData',
+    'ExactPaymentData',
     'FOIARequestData',
+    'PaymentValidationData',
+    'PaymentValidationData2',
+    'ReceivedPaymentData',
     'RecordsStatus',
     'RequestStatus'
 ]

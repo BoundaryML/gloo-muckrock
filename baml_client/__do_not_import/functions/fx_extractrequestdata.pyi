@@ -10,7 +10,9 @@
 from ..types.classes.cls_foiarequestdata import FOIARequestData
 from ..types.enums.enm_recordsstatus import RecordsStatus
 from ..types.enums.enm_requeststatus import RequestStatus
-from typing import Protocol, runtime_checkable
+from ..types.partial.classes.cls_foiarequestdata import PartialFOIARequestData
+from baml_core.stream import AsyncStream
+from typing import Callable, Protocol, runtime_checkable
 
 
 import typing
@@ -42,18 +44,39 @@ class IExtractRequestData(Protocol):
     async def __call__(self, arg: str, /) -> FOIARequestData:
         ...
 
+   
 
+@runtime_checkable
+class IExtractRequestDataStream(Protocol):
+    """
+    This is the interface for a stream function.
+
+    Args:
+        arg: str
+
+    Returns:
+        AsyncStream[FOIARequestData, PartialFOIARequestData]
+    """
+
+    def __call__(self, arg: str, /) -> AsyncStream[FOIARequestData, PartialFOIARequestData]:
+        ...
 class BAMLExtractRequestDataImpl:
     async def run(self, arg: str, /) -> FOIARequestData:
+        ...
+    
+    def stream(self, arg: str, /) -> AsyncStream[FOIARequestData, PartialFOIARequestData]:
         ...
 
 class IBAMLExtractRequestData:
     def register_impl(
         self, name: ImplName
-    ) -> typing.Callable[[IExtractRequestData], IExtractRequestData]:
+    ) -> typing.Callable[[IExtractRequestData, IExtractRequestDataStream], None]:
         ...
 
     async def __call__(self, arg: str, /) -> FOIARequestData:
+        ...
+
+    def stream(self, arg: str, /) -> AsyncStream[FOIARequestData, PartialFOIARequestData]:
         ...
 
     def get_impl(self, name: ImplName) -> BAMLExtractRequestDataImpl:
@@ -99,7 +122,7 @@ class IBAMLExtractRequestData:
         ...
 
     @typing.overload
-    def test(self, *, exclude_impl: typing.Iterable[ImplName]) -> pytest.MarkDecorator:
+    def test(self, *, exclude_impl: typing.Iterable[ImplName] = [], stream: bool = False) -> pytest.MarkDecorator:
         """
         Provides a pytest.mark.parametrize decorator to facilitate testing different implementations of
         the ExtractRequestDataInterface.
@@ -107,14 +130,25 @@ class IBAMLExtractRequestData:
         Args:
             exclude_impl : Iterable[ImplName]
                 The names of the implementations to exclude from testing.
+            stream: bool
+                If set, will return a streamable version of the test function.
 
         Usage:
             ```python
-            # All implementations except "v1" will be tested.
+            # All implementations except the given impl will be tested.
 
-            @baml.ExtractRequestData.test(exclude_impl=["v1"])
+            @baml.ExtractRequestData.test(exclude_impl=["implname"])
             async def test_logic(ExtractRequestDataImpl: IExtractRequestData) -> None:
                 result = await ExtractRequestDataImpl(...)
+            ```
+
+            ```python
+            # Streamable version of the test function.
+
+            @baml.ExtractRequestData.test(stream=True)
+            async def test_logic(ExtractRequestDataImpl: IExtractRequestDataStream) -> None:
+                async for result in ExtractRequestDataImpl(...):
+                    ...
             ```
         """
         ...

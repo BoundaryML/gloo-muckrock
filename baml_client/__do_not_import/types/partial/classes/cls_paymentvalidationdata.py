@@ -8,14 +8,12 @@
 # fmt: off
 
 from baml_lib._impl.deserializer import register_deserializer
-from enum import Enum
+from pydantic import BaseModel
+from typing import Optional
 
 
-@register_deserializer({
-
-})
-class RecordsStatus(str, Enum):
-    NOT_APPLICABLE = "NOT_APPLICABLE"
-    RECORDS_FOUND = "RECORDS_FOUND"
-    NO_RECORDS_FOUND = "NO_RECORDS_FOUND"
-    MORE_RECORDS_PENDING = "MORE_RECORDS_PENDING"
+@register_deserializer({  })
+class PartialPaymentValidationData(BaseModel):
+    presentPayment: Optional[float] = None
+    futurePayment: Optional[float] = None
+    notReceived: Optional[bool] = None

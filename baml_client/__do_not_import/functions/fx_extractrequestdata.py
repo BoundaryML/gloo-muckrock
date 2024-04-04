@@ -10,8 +10,10 @@
 from ..types.classes.cls_foiarequestdata import FOIARequestData
 from ..types.enums.enm_recordsstatus import RecordsStatus
 from ..types.enums.enm_requeststatus import RequestStatus
+from ..types.partial.classes.cls_foiarequestdata import PartialFOIARequestData
+from baml_core.stream import AsyncStream
 from baml_lib._impl.functions import BaseBAMLFunction
-from typing import Protocol, runtime_checkable
+from typing import AsyncIterator, Callable, Protocol, runtime_checkable
 
 
 IExtractRequestDataOutput = FOIARequestData
@@ -31,8 +33,23 @@ class IExtractRequestData(Protocol):
     async def __call__(self, arg: str, /) -> FOIARequestData:
         ...
 
+   
 
-class IBAMLExtractRequestData(BaseBAMLFunction[FOIARequestData]):
+@runtime_checkable
+class IExtractRequestDataStream(Protocol):
+    """
+    This is the interface for a stream function.
+
+    Args:
+        arg: str
+
+    Returns:
+        AsyncStream[FOIARequestData, PartialFOIARequestData]
+    """
+
+    def __call__(self, arg: str, /) -> AsyncStream[FOIARequestData, PartialFOIARequestData]:
+        ...
+class IBAMLExtractRequestData(BaseBAMLFunction[FOIARequestData, PartialFOIARequestData]):
     def __init__(self) -> None:
         super().__init__(
             "ExtractRequestData",
@@ -42,6 +59,10 @@ class IBAMLExtractRequestData(BaseBAMLFunction[FOIARequestData]):
 
     async def __call__(self, *args, **kwargs) -> FOIARequestData:
         return await self.get_impl("v1").run(*args, **kwargs)
+    
+    def stream(self, *args, **kwargs) -> AsyncStream[FOIARequestData, PartialFOIARequestData]:
+        res = self.get_impl("v1").stream(*args, **kwargs)
+        return res
 
 BAMLExtractRequestData = IBAMLExtractRequestData()
 

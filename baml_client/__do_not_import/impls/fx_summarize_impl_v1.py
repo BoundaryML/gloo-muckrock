@@ -9,13 +9,15 @@
 
 from ..clients.client_gpt35client import GPT35Client
 from ..functions.fx_summarize import BAMLSummarize
+from baml_core.provider_manager.llm_response import LLMResponse
+from baml_core.stream import AsyncStream
 from baml_lib._impl.deserializer import Deserializer
 
 
+import typing
 # Impl: v1
 # Client: GPT35Client
-# An implementation of .
-
+# An implementation of Summarize.
 
 __prompt_template = """\
 Extract data from the following TEXT that is a request for public records from a government agency.
@@ -46,13 +48,26 @@ __input_replacers = {
 # for inline SpecialForms like Optional, Union, List.
 __deserializer = Deserializer[str](str)  # type: ignore
 
+# Add a deserializer that handles stream responses, which are all Partial types
+__partial_deserializer = Deserializer[str](str)  # type: ignore
 
 
 
 
 
-@BAMLSummarize.register_impl("v1")
+
+
 async def v1(arg: str, /) -> str:
     response = await GPT35Client.run_prompt_template(template=__prompt_template, replacers=__input_replacers, params=dict(arg=arg))
     deserialized = __deserializer.from_string(response.generated)
     return deserialized
+
+
+def v1_stream(arg: str, /) -> AsyncStream[str, str]:
+    def run_prompt() -> typing.AsyncIterator[LLMResponse]:
+        raw_stream = GPT35Client.run_prompt_template_stream(template=__prompt_template, replacers=__input_replacers, params=dict(arg=arg))
+        return raw_stream
+    stream = AsyncStream(stream_cb=run_prompt, partial_deserializer=__partial_deserializer, final_deserializer=__deserializer)
+    return stream
+
+BAMLSummarize.register_impl("v1")(v1, v1_stream)

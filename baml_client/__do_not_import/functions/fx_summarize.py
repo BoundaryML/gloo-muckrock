@@ -7,8 +7,9 @@
 # pylint: disable=unused-import,line-too-long
 # fmt: off
 
+from baml_core.stream import AsyncStream
 from baml_lib._impl.functions import BaseBAMLFunction
-from typing import Protocol, runtime_checkable
+from typing import AsyncIterator, Callable, Protocol, runtime_checkable
 
 
 ISummarizeOutput = str
@@ -28,8 +29,23 @@ class ISummarize(Protocol):
     async def __call__(self, arg: str, /) -> str:
         ...
 
+   
 
-class IBAMLSummarize(BaseBAMLFunction[str]):
+@runtime_checkable
+class ISummarizeStream(Protocol):
+    """
+    This is the interface for a stream function.
+
+    Args:
+        arg: str
+
+    Returns:
+        AsyncStream[str, str]
+    """
+
+    def __call__(self, arg: str, /) -> AsyncStream[str, str]:
+        ...
+class IBAMLSummarize(BaseBAMLFunction[str, str]):
     def __init__(self) -> None:
         super().__init__(
             "Summarize",
@@ -39,6 +55,10 @@ class IBAMLSummarize(BaseBAMLFunction[str]):
 
     async def __call__(self, *args, **kwargs) -> str:
         return await self.get_impl("v1").run(*args, **kwargs)
+    
+    def stream(self, *args, **kwargs) -> AsyncStream[str, str]:
+        res = self.get_impl("v1").stream(*args, **kwargs)
+        return res
 
 BAMLSummarize = IBAMLSummarize()
 

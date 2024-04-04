@@ -7,6 +7,8 @@
 # pylint: disable=unused-import,line-too-long
 # fmt: off
 
+from ..types.classes.cls_paymentvalidationdata import PaymentValidationData
+from ..types.partial.classes.cls_paymentvalidationdata import PartialPaymentValidationData
 from baml_core.stream import AsyncStream
 from typing import Callable, Protocol, runtime_checkable
 
@@ -23,10 +25,10 @@ T = typing.TypeVar("T", bound=typing.Callable[..., typing.Any])
 CLS = typing.TypeVar("CLS", bound=type)
 
 
-ISummarizeOutput = str
+IPaymentValidationOutput = PaymentValidationData
 
 @runtime_checkable
-class ISummarize(Protocol):
+class IPaymentValidation(Protocol):
     """
     This is the interface for a function.
 
@@ -34,16 +36,16 @@ class ISummarize(Protocol):
         arg: str
 
     Returns:
-        str
+        PaymentValidationData
     """
 
-    async def __call__(self, arg: str, /) -> str:
+    async def __call__(self, arg: str, /) -> PaymentValidationData:
         ...
 
    
 
 @runtime_checkable
-class ISummarizeStream(Protocol):
+class IPaymentValidationStream(Protocol):
     """
     This is the interface for a stream function.
 
@@ -51,46 +53,46 @@ class ISummarizeStream(Protocol):
         arg: str
 
     Returns:
-        AsyncStream[str, str]
+        AsyncStream[PaymentValidationData, PartialPaymentValidationData]
     """
 
-    def __call__(self, arg: str, /) -> AsyncStream[str, str]:
+    def __call__(self, arg: str, /) -> AsyncStream[PaymentValidationData, PartialPaymentValidationData]:
         ...
-class BAMLSummarizeImpl:
-    async def run(self, arg: str, /) -> str:
+class BAMLPaymentValidationImpl:
+    async def run(self, arg: str, /) -> PaymentValidationData:
         ...
     
-    def stream(self, arg: str, /) -> AsyncStream[str, str]:
+    def stream(self, arg: str, /) -> AsyncStream[PaymentValidationData, PartialPaymentValidationData]:
         ...
 
-class IBAMLSummarize:
+class IBAMLPaymentValidation:
     def register_impl(
         self, name: ImplName
-    ) -> typing.Callable[[ISummarize, ISummarizeStream], None]:
+    ) -> typing.Callable[[IPaymentValidation, IPaymentValidationStream], None]:
         ...
 
-    async def __call__(self, arg: str, /) -> str:
+    async def __call__(self, arg: str, /) -> PaymentValidationData:
         ...
 
-    def stream(self, arg: str, /) -> AsyncStream[str, str]:
+    def stream(self, arg: str, /) -> AsyncStream[PaymentValidationData, PartialPaymentValidationData]:
         ...
 
-    def get_impl(self, name: ImplName) -> BAMLSummarizeImpl:
+    def get_impl(self, name: ImplName) -> BAMLPaymentValidationImpl:
         ...
 
     @contextmanager
     def mock(self) -> typing.Generator[mock.AsyncMock, None, None]:
         """
-        Utility for mocking the SummarizeInterface.
+        Utility for mocking the PaymentValidationInterface.
 
         Usage:
             ```python
             # All implementations are mocked.
 
             async def test_logic() -> None:
-                with baml.Summarize.mock() as mocked:
+                with baml.PaymentValidation.mock() as mocked:
                     mocked.return_value = ...
-                    result = await SummarizeImpl(...)
+                    result = await PaymentValidationImpl(...)
                     assert mocked.called
             ```
         """
@@ -100,7 +102,7 @@ class IBAMLSummarize:
     def test(self, test_function: T) -> T:
         """
         Provides a pytest.mark.parametrize decorator to facilitate testing different implementations of
-        the SummarizeInterface.
+        the PaymentValidationInterface.
 
         Args:
             test_function : T
@@ -110,9 +112,9 @@ class IBAMLSummarize:
             ```python
             # All implementations will be tested.
 
-            @baml.Summarize.test
-            async def test_logic(SummarizeImpl: ISummarize) -> None:
-                result = await SummarizeImpl(...)
+            @baml.PaymentValidation.test
+            async def test_logic(PaymentValidationImpl: IPaymentValidation) -> None:
+                result = await PaymentValidationImpl(...)
             ```
         """
         ...
@@ -121,7 +123,7 @@ class IBAMLSummarize:
     def test(self, *, exclude_impl: typing.Iterable[ImplName] = [], stream: bool = False) -> pytest.MarkDecorator:
         """
         Provides a pytest.mark.parametrize decorator to facilitate testing different implementations of
-        the SummarizeInterface.
+        the PaymentValidationInterface.
 
         Args:
             exclude_impl : Iterable[ImplName]
@@ -133,17 +135,17 @@ class IBAMLSummarize:
             ```python
             # All implementations except the given impl will be tested.
 
-            @baml.Summarize.test(exclude_impl=["implname"])
-            async def test_logic(SummarizeImpl: ISummarize) -> None:
-                result = await SummarizeImpl(...)
+            @baml.PaymentValidation.test(exclude_impl=["implname"])
+            async def test_logic(PaymentValidationImpl: IPaymentValidation) -> None:
+                result = await PaymentValidationImpl(...)
             ```
 
             ```python
             # Streamable version of the test function.
 
-            @baml.Summarize.test(stream=True)
-            async def test_logic(SummarizeImpl: ISummarizeStream) -> None:
-                async for result in SummarizeImpl(...):
+            @baml.PaymentValidation.test(stream=True)
+            async def test_logic(PaymentValidationImpl: IPaymentValidationStream) -> None:
+                async for result in PaymentValidationImpl(...):
                     ...
             ```
         """
@@ -153,7 +155,7 @@ class IBAMLSummarize:
     def test(self, test_class: typing.Type[CLS]) -> typing.Type[CLS]:
         """
         Provides a pytest.mark.parametrize decorator to facilitate testing different implementations of
-        the SummarizeInterface.
+        the PaymentValidationInterface.
 
         Args:
             test_class : Type[CLS]
@@ -163,14 +165,14 @@ class IBAMLSummarize:
         ```python
         # All implementations will be tested in every test method.
 
-        @baml.Summarize.test
+        @baml.PaymentValidation.test
         class TestClass:
-            def test_a(self, SummarizeImpl: ISummarize) -> None:
+            def test_a(self, PaymentValidationImpl: IPaymentValidation) -> None:
                 ...
-            def test_b(self, SummarizeImpl: ISummarize) -> None:
+            def test_b(self, PaymentValidationImpl: IPaymentValidation) -> None:
                 ...
         ```
         """
         ...
 
-BAMLSummarize: IBAMLSummarize
+BAMLPaymentValidation: IBAMLPaymentValidation
