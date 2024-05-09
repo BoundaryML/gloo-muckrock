@@ -15,6 +15,7 @@ from ..__do_not_import.types.classes.cls_exactpaymentdata import ExactPaymentDat
 from ..__do_not_import.types.classes.cls_foiarequestdata import FOIARequestData
 from ..__do_not_import.types.classes.cls_paymentvalidationdata import PaymentValidationData
 from ..__do_not_import.types.classes.cls_paymentvalidationdata2 import PaymentValidationData2
+from ..__do_not_import.types.classes.cls_paymentvalidationdata3 import PaymentValidationData3
 from ..__do_not_import.types.classes.cls_receivedpaymentdata import ReceivedPaymentData
 from ..__do_not_import.types.enums.enm_recordsstatus import RecordsStatus
 from ..__do_not_import.types.enums.enm_requeststatus import RequestStatus
@@ -37,6 +38,7 @@ __all__ = [
     'ISummarizeStream',
     'PaymentValidationData',
     'PaymentValidationData2',
+    'PaymentValidationData3',
     'ReceivedPaymentData',
     'RecordsStatus',
     'RequestStatus'

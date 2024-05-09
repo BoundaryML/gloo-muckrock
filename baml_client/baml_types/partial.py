@@ -12,6 +12,7 @@ from ..__do_not_import.types.partial.classes.cls_exactpaymentdata import Partial
 from ..__do_not_import.types.partial.classes.cls_foiarequestdata import PartialFOIARequestData
 from ..__do_not_import.types.partial.classes.cls_paymentvalidationdata import PartialPaymentValidationData
 from ..__do_not_import.types.partial.classes.cls_paymentvalidationdata2 import PartialPaymentValidationData2
+from ..__do_not_import.types.partial.classes.cls_paymentvalidationdata3 import PartialPaymentValidationData3
 from ..__do_not_import.types.partial.classes.cls_receivedpaymentdata import PartialReceivedPaymentData
 
 
@@ -23,5 +24,6 @@ __all__ = [
     'PartialFOIARequestData',
     'PartialPaymentValidationData',
     'PartialPaymentValidationData2',
+    'PartialPaymentValidationData3',
     'PartialReceivedPaymentData'
 ]

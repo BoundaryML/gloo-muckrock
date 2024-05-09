@@ -14,6 +14,8 @@ from typing import Optional
 
 @register_deserializer({  })
 class PartialPaymentValidationData(BaseModel):
-    presentPayment: Optional[float] = None
-    futurePayment: Optional[float] = None
+    paymentAmount: Optional[float] = None
+    estimate: Optional[bool] = None
+    required: Optional[bool] = None
+    responseRequired: Optional[bool] = None
     notReceived: Optional[bool] = None

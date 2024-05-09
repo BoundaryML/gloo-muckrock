@@ -11,7 +11,12 @@ import tiktoken
 from pydantic import BaseModel
 
 from ..baml_client import baml as b
-from ..baml_client.baml_types import FOIARequestData, RecordsStatus, RequestStatus, PaymentValidationData
+from ..baml_client.baml_types import (
+    FOIARequestData,
+    PaymentValidationData,
+    RecordsStatus,
+    RequestStatus,
+)
 from ..baml_client.tracing import set_tags, trace
 
 
@@ -122,7 +127,7 @@ enc = tiktoken.encoding_for_model("gpt-4")
 @trace
 async def process_request(
     request_text: str, file_text: str, **tags
-) -> (Tuple[FOIARequestData, str]):
+) -> Tuple[FOIARequestData, str]:
     if tags:
         set_tags(**tags)
 
@@ -148,8 +153,15 @@ async def process_request(
         paymentData = await b.PaymentValidation(
             request_text,
         )
-        # we mark as fix required if there is not presentPayment or if notReceived is True
-        if paymentData.presentPayment is None or paymentData.notReceived:
+        # payment is not required before fufilling the request or
+        # a response from the user is needed before the payment is made or
+        # it is a request for a previous payment
+        # mark as fix required
+        if (
+            not paymentData.required
+            or paymentData.responseRequired
+            or paymentData.notReceived
+        ):
             status = MRStatus.FIX
 
     set_tags(

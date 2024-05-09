@@ -12,6 +12,7 @@ from .classes.cls_exactpaymentdata import PartialExactPaymentData
 from .classes.cls_foiarequestdata import PartialFOIARequestData
 from .classes.cls_paymentvalidationdata import PartialPaymentValidationData
 from .classes.cls_paymentvalidationdata2 import PartialPaymentValidationData2
+from .classes.cls_paymentvalidationdata3 import PartialPaymentValidationData3
 from .classes.cls_receivedpaymentdata import PartialReceivedPaymentData
 
 
@@ -23,5 +24,6 @@ __all__ = [
     'PartialFOIARequestData',
     'PartialPaymentValidationData',
     'PartialPaymentValidationData2',
+    'PartialPaymentValidationData3',
     'PartialReceivedPaymentData'
 ]

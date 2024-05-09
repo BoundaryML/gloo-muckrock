@@ -13,9 +13,7 @@ from typing import Optional
 
 
 @register_deserializer({  })
-class PaymentValidationData(BaseModel):
-    paymentAmount: Optional[float] = None
-    estimate: bool
-    required: bool
-    responseRequired: bool
-    notReceived: bool
+class PartialPaymentValidationData3(BaseModel):
+    presentPayment: Optional[float] = None
+    futurePayment: Optional[float] = None
+    notReceived: Optional[bool] = None

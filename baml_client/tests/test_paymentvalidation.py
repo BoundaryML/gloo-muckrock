@@ -80,6 +80,86 @@ async def test_estimate_4(PaymentValidationImpl: IPaymentValidationStream, baml_
         await stream.get_final_response()
 
 @baml.PaymentValidation.test(stream=True)
+async def test_estimate_confirm_1(PaymentValidationImpl: IPaymentValidationStream, baml_ipc_channel: BaseIPCChannel):
+    def to_str(item: Any) -> str:
+        if isinstance(item, str):
+            return item
+        return dumps(item)
+
+    content = to_str("Good Afternoon Madam Kane,\r\nThe Department of Mineral Resources submitted your communications request to our state's Information Technology Department. They ran the related query and returned 297 emails to our agency meeting the criteria. Our estimate of reviewing the emails is 30 seconds per instance as many have attachments that will need to be looked at.\r\nThe first hour of locating requested records is free and has already occurred. The review for potential redaction of protected information, if any is present, is estimated to take an additional 1 ¼ hours (at $25/hour) resulting in a charge of $31.25\r\nIf you would like to proceed with this request, please let us know and we will arrange invoicing and payment. If you want to proceed with the request and the amount of time reviewing the emails differs from the estimate, we will refund any overages.\r\n\r\n\r\nRespectfully,\nBridget Danso\r\nPublic Information Officer")
+    deserializer = Deserializer[str](str) # type: ignore
+    param = deserializer.from_string(content)
+    async with PaymentValidationImpl(param) as stream:
+        async for response in stream.parsed_stream:
+            baml_ipc_channel.send("partial_response", response.json())
+
+        await stream.get_final_response()
+
+@baml.PaymentValidation.test(stream=True)
+async def test_estimate_confirm_2(PaymentValidationImpl: IPaymentValidationStream, baml_ipc_channel: BaseIPCChannel):
+    def to_str(item: Any) -> str:
+        if isinstance(item, str):
+            return item
+        return dumps(item)
+
+    content = to_str("Hi Julia,\r\n\r\nIn response to your request to narrow the scope of your request, and to answer your questions:\r\n\r\nIT Staff Set Up Fee - Your request will require two separate email searches for IT which will take an hour for each. Narrowing search terms and email addresses will not reduce this specific portion of the labor estimate.\r\n\r\nAdministrative Staff/Bureau Staff – once the email search has concluded, Admin Staff and Bureau Staff must then sort through the emails to determine what is responsive, non-responsive, and what may be exempt according to Idaho state law. The current labor estimate quotes 1 hour for bureau staff and 3 hours for administrative staff. The reduction in IDL email addresses to be searched from 8 to 3 should reduce this workload, but note the three remaining IDL email addresses are expected to generate the highest volumes of communication so it will not proportionally reduce the cost estimate. The second part you requested to narrow will not reduce the cost estimate, unless you are able to eliminate some of the email extensions as keywords, i.e., remove @ipaa.org, @ingaa.org, etc.; otherwise, it will not reduce the amount of time staff spends on sorting emails.\r\n\r\nAttorney General Staff - An attorney will need to review any potential exemptions. Reducing the IDL emails to be searched from 8 to 3 reduces the attorney labor estimate per the new cost estimate attached.\r\n\r\nI attached a new cost estimate with your requested reductions. Please let me know if you want to move forward with your narrowed request, your original request, or if you want to make further changes to your request.\r\n\r\nThanks,\r\n\r\n\r\n\r\n[Idaho Department of Lands logo]\r\nCameron Swisher\r\nPRR Coordinator\r\nIdaho Department of Lands\r\n300 N. 6th Street, Ste 103\r\nBoise, ID 83702\r\nOffice: (208) 334-0214\r\nEmail: public_records_request@idl.idaho.gov<mailto:public_records_request@idl.idaho.gov>\r\nhttps://www.idl.idaho.gov<https://www.idl.idaho.gov/>\n\nAttached Correspondence:\nREQUESTER NAME\nPRR DUE\nFILL IN ALL APPLICABLE HIGHLIGHTED AREAS\nCOPY/SCAN \nESTIMATE Copies Copy Rate Cost\nBureau $0.10 $ -\nArea $0.10 $ -\nOversize Copy/Scan \nFees and/or USB $5.00 $ -\n0.00 $0.10 $ -\nplus sales tax $ -\nLABOR ESTIMATE Hours \n(to .25 hour) Staff Rate1 Cost % of Total \nHours\nAdjusted \nHours Cost\n_______ Bureau Staff 0.00 0% 0.00 $ -\nAttorney General Staff 0.75 $44.00 33.00 13% 0.49 $ 21.52\nAdministrative Staff 3.00 $24.00 72.00 52% 1.96 $ 46.96\n0.00 0% 0.00 $ -\nArea 0.00 0% 0.00 $ -\n0.00 0% 0.00 $ -\n0.00 0% 0.00 $ -\nIT Staff Set-up Fee\n1 Hour for Each \nElectronic Search 2.00 $36.00 72.00 35% 1.30 $ 46.96\n5.75 $177.00 3.75 $ 115.43\nKeywords\nStations/\nServers \nto search\nHours per \nKeyword Staff Rate1 Cost (See \nInstructions)\nTotal \nHours\n% of Total \nHours\nAdjusted \nHours Cost\nBureau 0.125 $ - 0.00 0% 0.00 $ -\nArea 0.125 $ - 0.00 0% 0.00 $ -\nBureau 0.125 $23.00 $ - 0.00 0% 0.00 $ -\nArea 0.125 $ - 0.00 0% 0.00 $ -\nBureau 0.125 $ - 0.00 0% 0.00 $ -\nArea 0.125 $ - 0.00 0% 0.00 $ -\n0 0 0 $ - 0.00 0.00 $ -\nTotal Hours 5.75\nTotal Hours minus 2 3.75\nTotal Copies -\nSubtotal $177.00\nTotal (minus up to 100 copies & 2 hrs. labor2) $115.43\nServer\n@fusion.law Nov. 1 2023 - April 8, 2024\n@republicanags.com\n@ruleoflawdefensefund.org\n@rldf.org\n@uschamber.com\n@ipaa.org\n@energeoalliance.org\n@api.org\n@afpm.org\n@ierdc.org\n@axpc.org\n@aga.org\n@americanchemistry.com\n@ingaa.org\n@nullnoia.org\n@uschamber.com\n@eei.org\n@consumerenergyalliance.org\n@ngsa.org\n@convenience.org\n@nam.org\nWorkstation\nEmail Address \n@idl.idaho.gov Key Words\nJames Thum\nDustin Miller\n2024-0213\nNote: Fill in due date once fees received. The 10 business day count stops when requester is notified of \nfees which allows 30 calendar days for payment. Once payment is received the 10 business day count \nresumes. \nBetty Coppersmith\nPRR COST ESTIMATE Julia Kane\nWORK STATION \nSEARCH\nELECTRONIC DOCUMENT SEARCH\nSERVER SEARCH\nEMAIL SEARCH\nPRR No.\nTimeframe\nSEARCH CRITERIA\n@nwga.org\n@idahochamberalliance.com\n@iogcc.ok.gov\n@iaci.org\u0000\n\nServer\nNov. 1 2023 - April 8, 2024\nBetty Coppersmith\nELECTRONIC DOCUMENT SEARCH INSTRUCTIONS FOR I.T:\nElectronic document searches require an URGENT help desk ticket with the following information:\n*Search terms (identified by custodian, must match number of keywords identified above)\n*Name of each server to be searched\n*User name of each email account to be searched\n*User name of each work station to be searched \n(1) Per hour pay rate of the lowest paid employee necessary and qualified to process the request. See I.C. 74-102(10)(e)\n(2) I.C. 74-102(10) requires the first 100 pages and 2 hours of labor at no cost\nIDLPRR0003.03 05/2020\nTotal Hours Total Cost Less 2 Hrs Final Cost\nCopy/Scan/USB Charges $ - $ -\n5.75 $177.00 3.75 $ 115.43\n0.00 $ - 0.00 $ -\n5.75 $ 177.00 3.75 $ 115.43\nAnd ('Methane' Or 'OOOO' Or 'super emitter')\nSEARCH CRITERIA\nWorkstation Email Address Key Words Timeframe\n@ag.idaho.gov\nJames Thum\nDustin Miller\u0000")
+    deserializer = Deserializer[str](str) # type: ignore
+    param = deserializer.from_string(content)
+    async with PaymentValidationImpl(param) as stream:
+        async for response in stream.parsed_stream:
+            baml_ipc_channel.send("partial_response", response.json())
+
+        await stream.get_final_response()
+
+@baml.PaymentValidation.test(stream=True)
+async def test_estimate_confirm_3(PaymentValidationImpl: IPaymentValidationStream, baml_ipc_channel: BaseIPCChannel):
+    def to_str(item: Any) -> str:
+        if isinstance(item, str):
+            return item
+        return dumps(item)
+
+    content = to_str("Updated Public Information Cost Estimate Letter\r\n\r\nMs. Sherrie Hart\r\nVia email: 149983-80707454@requests.muckrock.com<mailto:149983-80707454@requests.muckrock.com>\r\n\r\nDear Ms. Hart:\r\n\r\nWe received your request for information, clarified on 9/7/2023, and initially determined that complying with your request would result in the imposition of a charge that exceeds $40. Therefore, we provided you with a cost estimate as required by Section 552.2615 of the Texas Government Code. We did not receive your payment for this deposit until 4/2/2024 and began receiving responsive information at that point.\r\n\r\nUpon gathering requested information, it has become evident that that the estimated charges will exceed the charges detailed in the written itemized statement by 20 percent or more. Therefore, we are providing a written updated itemized statement that details all estimated charges that would be imposed, including any allowable charges for labor or personnel costs.\r\n\r\nItemized List of Charges:\r\nDescription                                      Qty x Price                        Total\r\nLabor minutes ($15/hour)            150,000 x $0.25               $37,500\r\nOverhead charges                          20% of $37,500                $7,500\r\n                                                          Total cost                          $45,000 (minus $900 of initial deposit received)\r\n\r\nThere is a less expensive way for you to obtain this information. You may view the information in person at our offices. If you choose to view the information in person, please provide me with three dates and times when it will be convenient for you to come.\r\n\r\nThe estimated charges exceed $100.00; therefore, as allowed by section 552.263(a) of the Government Code, we require a deposit of 100% ($44,100.00) before starting work on your request. Complying with this request require labor to locate, compile, and manipulate the requested information (as the requested information would require redactions to be made to remove the presence of confidential information not subject to disclosure under the Act).\r\n\r\nYour request will be considered automatically withdrawn if you do not notify us in writing within ten business days from the date of this letter that you either:\r\n\r\n     (a) accept the charges;\r\n     (b) wish to modify your request; OR\r\n     (c) have sent to the Open Records Division of the Office of the Attorney General a complaint alleging that you are being overcharged for the information you have requested.\r\n\r\nAll communications concerning this request should be identified with the above reference number and addressed to this mailbox or the address listed below. If you have any questions regarding your records request, please feel free to contact our office at this email address or (512) 782-5443.\r\n\r\nSincerely,\r\n\r\nOpen Records\r\nTexas Military Department\r\nOffice: 512.782.5443\r\nFax: 737.358.9003\r\nP.O. Box 5218 (ATTN: FOIA)\r\nAustin, TX 78763\r\nng.tx.txarng.mbx.freedom-of-information-act@army.mil<mailto:ng.tx.txarng.mbx.freedom-of-information-act@army.mil>\n")
+    deserializer = Deserializer[str](str) # type: ignore
+    param = deserializer.from_string(content)
+    async with PaymentValidationImpl(param) as stream:
+        async for response in stream.parsed_stream:
+            baml_ipc_channel.send("partial_response", response.json())
+
+        await stream.get_final_response()
+
+@baml.PaymentValidation.test(stream=True)
+async def test_estimate_confirm_4(PaymentValidationImpl: IPaymentValidationStream, baml_ipc_channel: BaseIPCChannel):
+    def to_str(item: Any) -> str:
+        if isinstance(item, str):
+            return item
+        return dumps(item)
+
+    content = to_str("Good Afternoon,\r\n\r\nI am going to be processing your request for case # 220410139 I just wanted to let you know that we do have 2 BWC , 911 audio and also the report available for this incident, the minimum payment is going to be $107.00 ($46 per body warn camera video, $5 for report, $10 for 911 audio). Please advise if you do want these items so I can go ahead and start the process.\r\n\nThank you,\r\n\r\nJayda Jaramillo\r\nRecords Tech\r\nPima County Sheriff Department\r\n520-351-8357\r\nJayda.Jaramillo@sheriff.pima.gov")
+    deserializer = Deserializer[str](str) # type: ignore
+    param = deserializer.from_string(content)
+    async with PaymentValidationImpl(param) as stream:
+        async for response in stream.parsed_stream:
+            baml_ipc_channel.send("partial_response", response.json())
+
+        await stream.get_final_response()
+
+@baml.PaymentValidation.test(stream=True)
+async def test_estimate_confirm_5(PaymentValidationImpl: IPaymentValidationStream, baml_ipc_channel: BaseIPCChannel):
+    def to_str(item: Any) -> str:
+        if isinstance(item, str):
+            return item
+        return dumps(item)
+
+    content = to_str("Good morning.  Please see attached in response to FOIL #122-24.\r\n\r\nThank you.\r\n\r\n\r\n​Carla Flatau\r\nConfidential Assistant to HR Director\r\n716-438-4070 Phone\r\n716-438-4077 Fax\r\n\r\n\r\nNotice: This electronic transmission is intended for the sole use of the individual or entity to which it is addressed and may contain confidential, privileged or otherwise legally protected information. If you are not the intended recipient, or if you believe you are not the intended recipient, you are hereby notified that any use, disclosure, copying, distribution, or the taking of any action in reliance on the contents of this information, is strictly prohibited. Niagara County is not responsible for the content of any external hyperlink referenced in this email or any email. IF YOU HAVE RECEIVED THIS TRANSMISSION IN ERROR, PLEASE NOTIFY THE SENDER IMMEDIATELY BY EMAIL AND DELETE THE ORIGINAL MESSAGE ALONG WITH ANY PAPER OR ELECTRONIC COPIES. Thank you for your cooperation.\n\nAttached Correspondence:\nNIAGARA COUNTY Hon 2 Lege\nHUMAN RESOURCES DEPT. Dliectar\nGolden Triangle Office Building\n111 Main Street - Suite G2 0) 75408\nLockport, New York 14094 (716) 438-4077 Fax\nApril 16,2024\nMuckRock News\nDEPT MR 160726\n263 Huntington Avenue\nBoston, MA 02115\nRe: FOIL Request #12224\nDear Riford Family:\nPursuant to your FOIL request dated March 18, 2024, I have evaluated your request and due to\nthe level and extent of your request it will require extensive research and review of multiple\ncomputer systems, including systems and files that are no longer active. As a result, | have\nevaluated the time and effort required by staff to mine the information that you are requesting,\nand it will take 38 hours at $31.64 per hour dedicated to producing the requested information.\n‘We will begin to locate and compile the records upon receipt of $1,202.32.” Note that some of\nthe names listed on your FOIL request were duplicate names, as some last names changed due to\nmarriage or other legal name change.\nLet me know if you have any questions. Lastly, the information that you have requested may\nalready be available by accessing all goverment employee salaries at SéeThroughNY. com.\nSincerely,\nSe Se\nPeter P. Lopes\nDirector of Human Resources\nce: J. Sansone, Assistant County Attorney\nA. Tomasino, Legislative Clerk\n\f")
+    deserializer = Deserializer[str](str) # type: ignore
+    param = deserializer.from_string(content)
+    async with PaymentValidationImpl(param) as stream:
+        async for response in stream.parsed_stream:
+            baml_ipc_channel.send("partial_response", response.json())
+
+        await stream.get_final_response()
+
+@baml.PaymentValidation.test(stream=True)
 async def test_exact_1(PaymentValidationImpl: IPaymentValidationStream, baml_ipc_channel: BaseIPCChannel):
     def to_str(item: Any) -> str:
         if isinstance(item, str):
